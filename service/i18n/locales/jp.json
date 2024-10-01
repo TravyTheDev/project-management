@@ -1,0 +1,9 @@
+{
+    "auth": {
+        "no_email_no_pass": "メールアドレスと\nパスワードが必須",
+        "invalid": "メールアドレスまたは\nパスワードが不正です。",
+        "invalid_payload": "メールは無効\nまたはパスワードは\n3文字が必須",
+        "password_mismatch": "パスワードは一致しない。",
+        "email_in_use": "メールはもう登録されてる。"
+    }
+}

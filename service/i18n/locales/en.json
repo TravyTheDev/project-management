@@ -1,0 +1,9 @@
+{
+    "auth": {
+        "no_email_no_pass": "email and password required",
+        "invalid": "invalid email or password",
+        "invalid_payload": "email must be valid\npassword must be\nat least 3 characters",
+        "password_mismatch": "passwords must match",
+        "email_in_use": "email is in use"
+    }
+}
