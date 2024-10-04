@@ -8,6 +8,7 @@ import (
 	"project-management/service/i18n"
 	"project-management/service/jwt"
 	"project-management/service/mailer"
+	"project-management/service/projects"
 	"project-management/service/users"
 	"project-management/service/ws"
 
@@ -33,6 +34,7 @@ func (s *APIServer) Run() error {
 	router := mux.NewRouter()
 
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
+	//if I make a website client
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{frontUrl},
 		AllowCredentials: true,
@@ -46,6 +48,9 @@ func (s *APIServer) Run() error {
 	userHandler.RegisterRoutes(subRouter)
 	mailHandler := mailer.NewMailHandler(userStore, secretKey)
 	mailHandler.RegisterRoutes(subRouter)
+	projectsStore := projects.NewProjectsStore(s.db)
+	projectsHandler := projects.NewProjectsHandler(projectsStore)
+	projectsHandler.RegisterRoutes(subRouter)
 
 	hub := ws.NewHub()
 	wsHandler := ws.NewWSHandler(hub, secretKey)

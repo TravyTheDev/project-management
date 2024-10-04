@@ -76,13 +76,13 @@ func (h *WSHandler) joinRoom(w http.ResponseWriter, r *http.Request) {
 
 	cl := &Client{
 		Conn:     conn,
-		Message:  make(chan *Message, 10),
+		Message:  make(chan *types.Message, 10),
 		ID:       string(userID),
 		RoomID:   roomID,
 		Username: username,
 	}
 
-	m := &Message{
+	m := &types.Message{
 		Body:     fmt.Sprintf("%s has joined the room", username),
 		RoomID:   roomID,
 		Username: username,

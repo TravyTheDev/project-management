@@ -2,23 +2,17 @@ package ws
 
 import (
 	"log"
+	"project-management/types"
 
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
 	Conn     *websocket.Conn
-	Message  chan *Message
+	Message  chan *types.Message
 	ID       string `json:"id"`
 	RoomID   string `json:"roomID"`
 	Username string `json:"username"`
-}
-
-type Message struct {
-	Body     string `json:"body"`
-	RoomID   string `json:"roomID"`
-	Username string `json:"username"`
-	UserID   string `json:"userID"`
 }
 
 func (c *Client) writeMessage() {
@@ -50,7 +44,7 @@ func (c *Client) readMesasge(hub *Hub) {
 			}
 			break
 		}
-		msg := &Message{
+		msg := &types.Message{
 			Body:     string(m),
 			RoomID:   c.RoomID,
 			Username: c.Username,

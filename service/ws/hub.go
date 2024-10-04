@@ -2,6 +2,7 @@ package ws
 
 import (
 	"fmt"
+	"project-management/types"
 	"time"
 )
 
@@ -15,7 +16,7 @@ type Hub struct {
 	Rooms      map[string]*Room `json:"rooms"`
 	Register   chan *Client
 	Unregister chan *Client
-	Broadcast  chan *Message
+	Broadcast  chan *types.Message
 }
 
 func NewHub() *Hub {
@@ -23,7 +24,7 @@ func NewHub() *Hub {
 		Rooms:      make(map[string]*Room),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
-		Broadcast:  make(chan *Message, 5),
+		Broadcast:  make(chan *types.Message, 5),
 	}
 }
 
@@ -45,7 +46,7 @@ func (h *Hub) Run() {
 			if _, ok := h.Rooms[cl.RoomID]; ok {
 				if _, ok := h.Rooms[cl.RoomID].Clients[cl.ID]; ok {
 					if len(h.Rooms[cl.RoomID].Clients) != 0 {
-						h.Broadcast <- &Message{
+						h.Broadcast <- &types.Message{
 							Body:     fmt.Sprintf("%s has left the room", cl.Username),
 							RoomID:   cl.RoomID,
 							Username: cl.Username,
