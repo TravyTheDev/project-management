@@ -11,9 +11,9 @@ type SessionStore interface {
 
 type Session struct {
 	ID           string    `json:"id"`
-	UserEmail    string    `json:"user_email"`
-	RefreshToken string    `json:"refresh_token"`
-	IsRevoked    bool      `json:"is_revoked"`
-	CreatedAt    time.Time `json:"created_at"`
-	ExpiresAt    time.Time `json:"expires_at"`
+	UserEmail    string    `json:"userEmail"`
+	RefreshToken string    `json:"refreshToken"`
+	IsRevoked    bool      `json:"isRevoked"`
+	CreatedAt    time.Time `json:"createdAt"`
+	ExpiresAt    time.Time `json:"expiresAt"`
 }

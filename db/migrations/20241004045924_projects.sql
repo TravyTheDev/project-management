@@ -9,6 +9,8 @@ CREATE TABLE projects(
     assignee_id integer nullable references users(id),
     urgency tinyint not null,
     notes varchar(255),
+    start_date timestamp nullable,
+    end_date timestamp nullable,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (title)

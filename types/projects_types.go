@@ -7,17 +7,22 @@ type ProjectsStore interface {
 	DeleteProject(int) error
 	UpdateProject(*Project) error
 	GetAllProjects() ([]*Project, error)
+	GetProjectByID(int) (*Project, error)
+	GetProjectsByParentID(int) ([]*Project, error)
+	GetProjectsByAssigneeID(int) ([]*Project, error)
 }
 
 type Project struct {
 	ID          int       `json:"id"`
-	ParentID    int       `json:"parent_id"`
+	ParentID    int       `json:"parentID"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Status      int       `json:"status"`
-	AssigneeID  int       `json:"assignee_id"`
+	AssigneeID  int       `json:"assigneeID"`
 	Urgency     int       `json:"urgency"`
 	Notes       string    `json:"notes"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	StartDate   string    `json:"startDate"`
+	EndDate     string    `json:"endDate"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }

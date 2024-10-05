@@ -25,6 +25,9 @@ func (p *ProjectsHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/projects/delete_project/{id}", p.deleteProject).Methods("DELETE")
 	router.HandleFunc("/projects/update_project", p.updateProject).Methods("PUT")
 	router.HandleFunc("/projects/all_projects", p.getAllProjects).Methods("GET")
+	router.HandleFunc("/projects/project/{id}", p.getProjectByID).Methods("GET")
+	router.HandleFunc("/projects/child_projects/{id}", p.getProjectsByParentID).Methods("GET")
+	router.HandleFunc("/projects/user_projects/{id}", p.getProjectsByAssigneeID).Methods("GET")
 }
 
 func (p *ProjectsHandler) createProject(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +64,58 @@ func (p *ProjectsHandler) updateProject(w http.ResponseWriter, r *http.Request) 
 
 func (p *ProjectsHandler) getAllProjects(w http.ResponseWriter, r *http.Request) {
 	projects, err := p.projectsStore.GetAllProjects()
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
+		http.Error(w, "error getting projects", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *ProjectsHandler) getProjectByID(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	projectID, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	project, err := p.projectsStore.GetProjectByID(projectID)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if err := json.NewEncoder(w).Encode(project); err != nil {
+		http.Error(w, "error getting project", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *ProjectsHandler) getProjectsByParentID(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	projectID, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	projects, err := p.projectsStore.GetProjectsByParentID(projectID)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
+		http.Error(w, "error getting projects", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *ProjectsHandler) getProjectsByAssigneeID(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	projectID, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	projects, err := p.projectsStore.GetProjectsByAssigneeID(projectID)
 	if err != nil {
 		fmt.Println(err)
 	}
