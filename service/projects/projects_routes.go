@@ -28,6 +28,7 @@ func (p *ProjectsHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/projects/project/{id}", p.getProjectByID).Methods("GET")
 	router.HandleFunc("/projects/child_projects/{id}", p.getProjectsByParentID).Methods("GET")
 	router.HandleFunc("/projects/user_projects/{id}", p.getProjectsByAssigneeID).Methods("GET")
+	router.HandleFunc("/projects/project_status/{status}", p.getProjectsByStatus).Methods("GET")
 }
 
 func (p *ProjectsHandler) createProject(w http.ResponseWriter, r *http.Request) {
@@ -116,6 +117,23 @@ func (p *ProjectsHandler) getProjectsByAssigneeID(w http.ResponseWriter, r *http
 	}
 
 	projects, err := p.projectsStore.GetProjectsByAssigneeID(projectID)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
+		http.Error(w, "error getting projects", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *ProjectsHandler) getProjectsByStatus(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["status"]
+	projectID, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	projects, err := p.projectsStore.GetProjectsByStatus(projectID)
 	if err != nil {
 		fmt.Println(err)
 	}

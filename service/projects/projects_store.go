@@ -109,7 +109,7 @@ func (p *ProjectsStore) GetProjectByID(id int) (*types.Project, error) {
 func (p *ProjectsStore) GetProjectsByParentID(id int) ([]*types.Project, error) {
 	stmt := `SELECT * FROM projects where parent_id = ?`
 
-	projects, err := p.getProjectsSliceFromIDQuery(stmt, id)
+	projects, err := p.getProjectsSliceFromIntQuery(stmt, id)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (p *ProjectsStore) GetProjectsByParentID(id int) ([]*types.Project, error) 
 func (p *ProjectsStore) GetProjectsByAssigneeID(id int) ([]*types.Project, error) {
 	stmt := `SELECT * FROM projects where assignee_id = ?`
 
-	projects, err := p.getProjectsSliceFromIDQuery(stmt, id)
+	projects, err := p.getProjectsSliceFromIntQuery(stmt, id)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,18 @@ func (p *ProjectsStore) GetProjectsByAssigneeID(id int) ([]*types.Project, error
 	return projects, nil
 }
 
-func (p *ProjectsStore) getProjectsSliceFromIDQuery(stmt string, id int) ([]*types.Project, error) {
+func (p *ProjectsStore) GetProjectsByStatus(status int) ([]*types.Project, error) {
+	stmt := `SELECT * FROM projects where status = ?`
+
+	projects, err := p.getProjectsSliceFromIntQuery(stmt, status)
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
+}
+
+func (p *ProjectsStore) getProjectsSliceFromIntQuery(stmt string, id int) ([]*types.Project, error) {
 	rows, err := p.db.Query(stmt, id)
 	if err != nil {
 		return nil, err
