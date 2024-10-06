@@ -34,10 +34,12 @@ func (p *ProjectsHandler) RegisterRoutes(router *mux.Router) {
 func (p *ProjectsHandler) createProject(w http.ResponseWriter, r *http.Request) {
 	project := &types.Project{}
 	if err := json.NewDecoder(r.Body).Decode(&project); err != nil {
-		fmt.Println(err)
+		http.Error(w, "error decoding project body", http.StatusInternalServerError)
+		return
 	}
 	if err := p.projectsStore.CreateProject(project); err != nil {
-		fmt.Println(err)
+		http.Error(w, "error creating project", http.StatusInternalServerError)
+		return
 	}
 }
 
