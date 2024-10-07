@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"project-management/types"
+	"strings"
 )
 
 type UserStore struct {
@@ -89,6 +90,33 @@ func (s *UserStore) ChangePassword(email string, password string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *UserStore) SearchUser(text string) ([]*types.UserRes, error) {
+	users := make([]*types.UserRes, 0)
+	splitStr := strings.Split(text, " ")
+	for _, search := range splitStr {
+		if len(search) != 0 {
+			stmt := `SELECT * FROM users WHERE username LIKE ?`
+			rows, err := s.db.Query(stmt, `%`+search+`%`)
+			if err != nil {
+				return nil, err
+			}
+			for rows.Next() {
+				u, err := scanRowsIntoUser(rows)
+				if err != nil {
+					return nil, err
+				}
+				user := &types.UserRes{
+					ID:       u.ID,
+					Username: u.Username,
+					Email:    u.Email,
+				}
+				users = append(users, user)
+			}
+		}
+	}
+	return users, nil
 }
 
 func scanRowsIntoUser(rows *sql.Rows) (*types.User, error) {

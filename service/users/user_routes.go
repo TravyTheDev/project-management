@@ -31,12 +31,13 @@ func NewHandler(userStore types.UserStore, sessionStore types.SessionStore, secr
 }
 
 func (h *UserHandler) RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("/search_user/{email}", h.handleSearchByEmail).Methods("GET")
+	router.HandleFunc("/search_username/{name}", h.searchUser).Methods("GET")
 	router.HandleFunc("/register/{lang}", h.handleRegister).Methods("POST")
 	router.HandleFunc("/login/{lang}", h.handleLogin).Methods("POST")
 	router.HandleFunc("/logout", h.handleLogout).Methods("POST")
 	router.HandleFunc("/me", jwt.GetAuthMiddlewareFunc(h.jwtMaker, h.handleGetUser)).Methods("GET")
 	router.HandleFunc("/renew_token", h.renewAccessToken).Methods("POST")
-	router.HandleFunc("/search_user/{email}", h.handleSearchByEmail).Methods("GET")
 	router.HandleFunc("/confirm_numbers", h.confirmNumbers).Methods("POST")
 	router.HandleFunc("/change_password", h.changePassword).Methods("POST")
 }
@@ -315,6 +316,24 @@ func (h *UserHandler) changePassword(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.userStore.ChangePassword(claims.Email, hashedPassword); err != nil {
 		http.Error(w, "error changing password", http.StatusBadRequest)
+		return
+	}
+}
+
+func (h *UserHandler) searchUser(w http.ResponseWriter, r *http.Request) {
+
+	name := mux.Vars(r)["name"]
+
+	users, err := h.userStore.SearchUser(name)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(users) != 0 {
+		if err := json.NewEncoder(w).Encode(users); err != nil {
+			http.Error(w, "error getting user", http.StatusInternalServerError)
+			return
+		}
+	} else {
 		return
 	}
 }

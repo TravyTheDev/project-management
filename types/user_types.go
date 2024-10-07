@@ -7,6 +7,7 @@ type UserStore interface {
 	GetUserByEmail(string) (*User, error)
 	GetUserByID(int) (*UserRes, error)
 	ChangePassword(string, string) error
+	SearchUser(string) ([]*UserRes, error)
 }
 
 type User struct {
@@ -35,4 +36,8 @@ type UserRes struct {
 type LoginUserPayload struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+}
+
+type SearchReq struct {
+	Text string `json:"text"`
 }
