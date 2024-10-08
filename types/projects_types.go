@@ -7,7 +7,7 @@ type ProjectsStore interface {
 	DeleteProject(int) error
 	UpdateProject(*Project) error
 	GetAllProjects() ([]*Project, error)
-	GetProjectByID(int) (*Project, error)
+	GetProjectByID(int) (*ProjectRes, error)
 	GetProjectsByParentID(int) ([]*Project, error)
 	GetProjectsByAssigneeID(int) ([]*Project, error)
 	GetProjectsByStatus(int) ([]*Project, error)
@@ -26,4 +26,9 @@ type Project struct {
 	EndDate     string    `json:"endDate"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
+}
+
+type ProjectRes struct {
+	Project *Project `json:"project"`
+	User    *UserRes `json:"user,omitempty"`
 }

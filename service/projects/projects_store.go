@@ -88,22 +88,43 @@ func (p *ProjectsStore) GetAllProjects() ([]*types.Project, error) {
 	return projects, nil
 }
 
-func (p *ProjectsStore) GetProjectByID(id int) (*types.Project, error) {
-	stmt := `SELECT * FROM projects where id = ?`
+func (p *ProjectsStore) GetProjectByID(id int) (*types.ProjectRes, error) {
+	// stmt := `SELECT * FROM projects where id = ?`
+	stmt := `SELECT parent_id, title, description, status, assignee_id,` +
+		`urgency, notes, start_date, end_date, COALESCE(users.id, 0), COALESCE(users.username, ''), COALESCE(users.email, '') ` +
+		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.id = ?`
 
 	rows, err := p.db.Query(stmt, id)
 	if err != nil {
 		return nil, err
 	}
 	project := &types.Project{}
+	user := &types.UserRes{}
 	for rows.Next() {
-		project, err = p.scanRowsIntoProject(rows)
+		err := rows.Scan(
+			&project.ParentID,
+			&project.Title,
+			&project.Description,
+			&project.Status,
+			&project.AssigneeID,
+			&project.Urgency,
+			&project.Notes,
+			&project.StartDate,
+			&project.EndDate,
+			&user.ID,
+			&user.Username,
+			&user.Email,
+		)
 		if err != nil {
 			return nil, err
 		}
 	}
+	projectRes := &types.ProjectRes{
+		Project: project,
+		User:    user,
+	}
 
-	return project, nil
+	return projectRes, nil
 }
 
 func (p *ProjectsStore) GetProjectsByParentID(id int) ([]*types.Project, error) {
