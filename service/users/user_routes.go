@@ -94,7 +94,6 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	lang := mux.Vars(r)["lang"]
 	var payload types.LoginUserPayload
-
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		fmt.Println(err)
 	}
@@ -121,6 +120,10 @@ func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(u.ID); err != nil {
+		http.Error(w, "error getting user", http.StatusInternalServerError)
+		return
+	}
 
 }
 

@@ -11,7 +11,8 @@ import (
 
 type Broker struct {
 	// users is a map where the key is the user ID and the value
-	users map[string]chan []byte
+	// is a slice of channels to connections for that user ID
+	users map[string][]chan []byte
 	// actions is a channel of functions to cal in the brokers
 	// go routine. The broker executes everything in that single
 	// go routine to avoid data races.
@@ -20,15 +21,12 @@ type Broker struct {
 }
 
 type NotifMessage struct {
-	Name     string `json:"name"`
-	Message  string `json:"message"`
-	RoomID   string `json:"roomID"`
-	RoomName string `json:"roomName"`
+	Message string `json:"message"`
 }
 
 func NewBroker(secretKey string) *Broker {
 	return &Broker{
-		users:    make(map[string]chan []byte),
+		users:    make(map[string][]chan []byte),
 		actions:  make(chan func()),
 		jwtMaker: jwt.NewJWTMaker(secretKey),
 	}
@@ -48,7 +46,7 @@ func (b *Broker) listen() {
 
 func (b *Broker) addUserChan(id string, ch chan []byte) {
 	b.actions <- func() {
-		b.users[id] = ch
+		b.users[id] = append(b.users[id], ch)
 	}
 }
 
@@ -59,8 +57,23 @@ func (b Broker) removeUserChan(id string, ch chan []byte) {
 		}
 	}()
 	b.actions <- func() {
-		delete(b.users, id)
-		close(ch)
+		channels := b.users[id]
+		i := 0
+		for _, channel := range channels {
+			if channel != ch {
+				channels[i] = channel
+				i = i + 1
+			}
+			if i == 0 {
+				delete(b.users, id)
+			} else {
+				b.users[id] = channels[:1]
+			}
+			// Close channel to break loop at beginning
+			// this must be done to ensure broker does not send to
+			// closed goroutine
+			close(ch)
+		}
 	}
 }
 
@@ -107,6 +120,8 @@ func (b *Broker) broadcastMessage(w http.ResponseWriter, r *http.Request) {
 
 func (b *Broker) sendToUser(id string, data []byte) {
 	b.actions <- func() {
-		b.users[id] <- data
+		for _, ch := range b.users[id] {
+			ch <- data
+		}
 	}
 }
