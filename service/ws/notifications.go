@@ -21,7 +21,8 @@ type Broker struct {
 }
 
 type NotifMessage struct {
-	Message string `json:"message"`
+	ProjectID int    `json:"id"`
+	Message   string `json:"message"`
 }
 
 func NewBroker(secretKey string) *Broker {
