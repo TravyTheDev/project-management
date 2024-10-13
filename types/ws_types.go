@@ -8,13 +8,11 @@ type Message struct {
 }
 
 type CreateRoomReq struct {
-	ID   string `json:"id" validate:"required"`
-	Name string `json:"name" validate:"required"`
+	ID string `json:"id" validate:"required"`
 }
 
 type RoomRes struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID string `json:"id"`
 }
 
 type ClientRes struct {

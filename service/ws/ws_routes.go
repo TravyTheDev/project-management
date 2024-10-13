@@ -6,9 +6,7 @@ import (
 	"net/http"
 	"project-management/service/jwt"
 	"project-management/types"
-	"project-management/utils"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
@@ -43,21 +41,21 @@ func (h *WSHandler) RegisterRoutes(router *mux.Router) {
 func (h *WSHandler) createRoom(w http.ResponseWriter, r *http.Request) {
 	var req *types.CreateRoomReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		fmt.Println(err)
 		http.Error(w, "error creating room", http.StatusBadRequest)
 		return
 	}
 
-	if err := utils.Validate.Struct(req); err != nil {
-		errors := err.(validator.ValidationErrors)
-		if errors != nil {
-			http.Error(w, "room must have a name", http.StatusBadRequest)
-		}
-		return
-	}
+	// if err := utils.Validate.Struct(req); err != nil {
+	// 	errors := err.(validator.ValidationErrors)
+	// 	if errors != nil {
+	// 		http.Error(w, "room must have a name", http.StatusBadRequest)
+	// 	}
+	// 	return
+	// }
 
 	h.hub.Rooms[req.ID] = &Room{
 		ID:      req.ID,
-		Name:    req.Name,
 		Clients: make(map[string]*Client),
 	}
 
@@ -101,8 +99,7 @@ func (h *WSHandler) getRooms(w http.ResponseWriter, r *http.Request) {
 
 	for _, room := range h.hub.Rooms {
 		rooms = append(rooms, types.RoomRes{
-			ID:   room.ID,
-			Name: room.Name,
+			ID: room.ID,
 		})
 	}
 
