@@ -29,6 +29,8 @@ func (p *ProjectsHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/projects/child_projects/{id}", p.getProjectsByParentID).Methods("GET")
 	router.HandleFunc("/projects/user_projects/{id}", p.getProjectsByAssigneeID).Methods("GET")
 	router.HandleFunc("/projects/project_status/{status}", p.getProjectsByStatus).Methods("GET")
+	router.HandleFunc("/projects/project_urgency/{urgency}", p.getProjectsByUrgency).Methods("GET")
+	router.HandleFunc("/projects/search_projects/{title}", p.searchProjects).Methods("GET")
 }
 
 func (p *ProjectsHandler) createProject(w http.ResponseWriter, r *http.Request) {
@@ -130,17 +132,51 @@ func (p *ProjectsHandler) getProjectsByAssigneeID(w http.ResponseWriter, r *http
 
 func (p *ProjectsHandler) getProjectsByStatus(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["status"]
-	projectID, err := strconv.Atoi(id)
+	status, err := strconv.Atoi(id)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	projects, err := p.projectsStore.GetProjectsByStatus(projectID)
+	projects, err := p.projectsStore.GetProjectsByStatus(status)
 	if err != nil {
 		fmt.Println(err)
 	}
 	if err := json.NewEncoder(w).Encode(projects); err != nil {
 		http.Error(w, "error getting projects", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *ProjectsHandler) getProjectsByUrgency(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["urgency"]
+	urgency, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	projects, err := p.projectsStore.GetProjectsByUrgency(urgency)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
+		http.Error(w, "error getting projects", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *ProjectsHandler) searchProjects(w http.ResponseWriter, r *http.Request) {
+	title := mux.Vars(r)["title"]
+
+	users, err := p.projectsStore.SearchProjects(title)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(users) != 0 {
+		if err := json.NewEncoder(w).Encode(users); err != nil {
+			http.Error(w, "error getting projects", http.StatusInternalServerError)
+			return
+		}
+	} else {
 		return
 	}
 }

@@ -89,8 +89,7 @@ func (p *ProjectsStore) GetAllProjects() ([]*types.Project, error) {
 }
 
 func (p *ProjectsStore) GetProjectByID(id int) (*types.ProjectRes, error) {
-	// stmt := `SELECT * FROM projects where id = ?`
-	stmt := `SELECT parent_id, title, description, status, assignee_id,` +
+	stmt := `SELECT projects.id, parent_id, title, description, status, assignee_id,` +
 		`urgency, notes, start_date, end_date, COALESCE(users.id, 0), COALESCE(users.username, ''), COALESCE(users.email, '') ` +
 		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.id = ?`
 
@@ -98,30 +97,12 @@ func (p *ProjectsStore) GetProjectByID(id int) (*types.ProjectRes, error) {
 	if err != nil {
 		return nil, err
 	}
-	project := &types.Project{}
-	user := &types.UserRes{}
+	projectRes := new(types.ProjectRes)
 	for rows.Next() {
-		err := rows.Scan(
-			&project.ParentID,
-			&project.Title,
-			&project.Description,
-			&project.Status,
-			&project.AssigneeID,
-			&project.Urgency,
-			&project.Notes,
-			&project.StartDate,
-			&project.EndDate,
-			&user.ID,
-			&user.Username,
-			&user.Email,
-		)
+		projectRes, err = p.scanRowsIntoProjectRes(rows)
 		if err != nil {
 			return nil, err
 		}
-	}
-	projectRes := &types.ProjectRes{
-		Project: project,
-		User:    user,
 	}
 
 	return projectRes, nil
@@ -149,14 +130,65 @@ func (p *ProjectsStore) GetProjectsByAssigneeID(id int) ([]*types.Project, error
 	return projects, nil
 }
 
-func (p *ProjectsStore) GetProjectsByStatus(status int) ([]*types.Project, error) {
-	stmt := `SELECT * FROM projects where status = ?`
+func (p *ProjectsStore) GetProjectsByStatus(status int) ([]*types.ProjectRes, error) {
+	stmt := `SELECT projects.id, parent_id, title, description, status, assignee_id,` +
+		`urgency, notes, start_date, end_date, COALESCE(users.id, 0), COALESCE(users.username, ''), COALESCE(users.email, '') ` +
+		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.status = ? AND projects.parent_id = 0`
 
-	projects, err := p.getProjectsSliceFromIntQuery(stmt, status)
+	rows, err := p.db.Query(stmt, status)
 	if err != nil {
 		return nil, err
 	}
+	projects := make([]*types.ProjectRes, 0)
 
+	for rows.Next() {
+		p, err := p.scanRowsIntoProjectRes(rows)
+		if err != nil {
+			return nil, err
+		}
+		projects = append(projects, p)
+	}
+
+	return projects, nil
+}
+
+func (p *ProjectsStore) GetProjectsByUrgency(urgency int) ([]*types.ProjectRes, error) {
+	stmt := `SELECT projects.id, parent_id, title, description, status, assignee_id,` +
+		`urgency, notes, start_date, end_date, COALESCE(users.id, 0), COALESCE(users.username, ''), COALESCE(users.email, '') ` +
+		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.urgency = ? AND projects.parent_id = 0`
+
+	rows, err := p.db.Query(stmt, urgency)
+	if err != nil {
+		return nil, err
+	}
+	projects := make([]*types.ProjectRes, 0)
+
+	for rows.Next() {
+		p, err := p.scanRowsIntoProjectRes(rows)
+		if err != nil {
+			return nil, err
+		}
+		projects = append(projects, p)
+	}
+
+	return projects, nil
+}
+
+func (p *ProjectsStore) SearchProjects(text string) ([]*types.Project, error) {
+	projects := make([]*types.Project, 0)
+	stmt := `SELECT * FROM projects WHERE title LIKE REPLACE(?, " ", "%")`
+	rows, err := p.db.Query(stmt, `%`+text+`%`)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		project, err := p.scanRowsIntoProject(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		projects = append(projects, project)
+	}
 	return projects, nil
 }
 
@@ -197,4 +229,33 @@ func (p *ProjectsStore) scanRowsIntoProject(rows *sql.Rows) (*types.Project, err
 		fmt.Println(err)
 	}
 	return project, nil
+}
+
+func (p *ProjectsStore) scanRowsIntoProjectRes(rows *sql.Rows) (*types.ProjectRes, error) {
+	project := new(types.Project)
+	user := new(types.UserRes)
+	err := rows.Scan(
+		&project.ID,
+		&project.ParentID,
+		&project.Title,
+		&project.Description,
+		&project.Status,
+		&project.AssigneeID,
+		&project.Urgency,
+		&project.Notes,
+		&project.StartDate,
+		&project.EndDate,
+		&user.ID,
+		&user.Username,
+		&user.Email,
+	)
+	if err != nil {
+		return nil, err
+	}
+	projectRes := &types.ProjectRes{
+		Project: project,
+		User:    user,
+	}
+
+	return projectRes, nil
 }

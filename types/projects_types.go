@@ -10,7 +10,9 @@ type ProjectsStore interface {
 	GetProjectByID(int) (*ProjectRes, error)
 	GetProjectsByParentID(int) ([]*Project, error)
 	GetProjectsByAssigneeID(int) ([]*Project, error)
-	GetProjectsByStatus(int) ([]*Project, error)
+	GetProjectsByStatus(int) ([]*ProjectRes, error)
+	GetProjectsByUrgency(int) ([]*ProjectRes, error)
+	SearchProjects(string) ([]*Project, error)
 }
 
 type Project struct {
