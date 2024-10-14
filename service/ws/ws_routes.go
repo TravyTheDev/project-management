@@ -46,14 +46,6 @@ func (h *WSHandler) createRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if err := utils.Validate.Struct(req); err != nil {
-	// 	errors := err.(validator.ValidationErrors)
-	// 	if errors != nil {
-	// 		http.Error(w, "room must have a name", http.StatusBadRequest)
-	// 	}
-	// 	return
-	// }
-
 	h.hub.Rooms[req.ID] = &Room{
 		ID:      req.ID,
 		Clients: make(map[string]*Client),
@@ -72,6 +64,13 @@ func (h *WSHandler) joinRoom(w http.ResponseWriter, r *http.Request) {
 	userID := mux.Vars(r)["user_id"]
 	username := mux.Vars(r)["username"]
 
+	if _, ok := h.hub.Rooms[roomID]; !ok {
+		h.hub.Rooms[roomID] = &Room{
+			ID:      roomID,
+			Clients: make(map[string]*Client),
+		}
+	}
+
 	cl := &Client{
 		Conn:     conn,
 		Message:  make(chan *types.Message, 10),
@@ -80,15 +79,7 @@ func (h *WSHandler) joinRoom(w http.ResponseWriter, r *http.Request) {
 		Username: username,
 	}
 
-	m := &types.Message{
-		Body:     fmt.Sprintf("%s has joined the room", username),
-		RoomID:   roomID,
-		Username: username,
-		UserID:   cl.ID,
-	}
-
 	h.hub.Register <- cl
-	h.hub.Broadcast <- m
 
 	go cl.writeMessage()
 	cl.readMesasge(h.hub)

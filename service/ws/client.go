@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"log"
+	"fmt"
 	"project-management/types"
 
 	"github.com/gorilla/websocket"
@@ -40,7 +40,7 @@ func (c *Client) readMesasge(hub *Hub) {
 		_, m, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				fmt.Printf("error: %v", err)
 			}
 			break
 		}

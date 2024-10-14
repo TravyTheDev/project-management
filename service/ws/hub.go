@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"fmt"
 	"project-management/types"
 	"time"
 )
@@ -45,14 +44,6 @@ func (h *Hub) Run() {
 		case cl := <-h.Unregister:
 			if _, ok := h.Rooms[cl.RoomID]; ok {
 				if _, ok := h.Rooms[cl.RoomID].Clients[cl.ID]; ok {
-					if len(h.Rooms[cl.RoomID].Clients) != 0 {
-						h.Broadcast <- &types.Message{
-							Body:     fmt.Sprintf("%s has left the room", cl.Username),
-							RoomID:   cl.RoomID,
-							Username: cl.Username,
-							UserID:   cl.ID,
-						}
-					}
 					delete(h.Rooms[cl.RoomID].Clients, cl.ID)
 					close(cl.Message)
 					h.scheduleDeleteRoom(h.Rooms[cl.RoomID])
