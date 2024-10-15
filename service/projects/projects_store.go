@@ -133,7 +133,7 @@ func (p *ProjectsStore) GetProjectsByAssigneeID(id int) ([]*types.Project, error
 func (p *ProjectsStore) GetProjectsByStatus(status int) ([]*types.ProjectRes, error) {
 	stmt := `SELECT projects.id, parent_id, title, description, status, assignee_id,` +
 		`urgency, notes, start_date, end_date, COALESCE(users.id, 0), COALESCE(users.username, ''), COALESCE(users.email, '') ` +
-		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.status = ? AND projects.parent_id = 0`
+		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.status = ? AND projects.parent_id = -1`
 
 	rows, err := p.db.Query(stmt, status)
 	if err != nil {
@@ -155,7 +155,7 @@ func (p *ProjectsStore) GetProjectsByStatus(status int) ([]*types.ProjectRes, er
 func (p *ProjectsStore) GetProjectsByUrgency(urgency int) ([]*types.ProjectRes, error) {
 	stmt := `SELECT projects.id, parent_id, title, description, status, assignee_id,` +
 		`urgency, notes, start_date, end_date, COALESCE(users.id, 0), COALESCE(users.username, ''), COALESCE(users.email, '') ` +
-		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.urgency = ? AND projects.parent_id = 0`
+		`FROM projects LEFT JOIN users ON users.id = projects.assignee_id WHERE projects.urgency = ? AND projects.parent_id = -1`
 
 	rows, err := p.db.Query(stmt, urgency)
 	if err != nil {
