@@ -18,10 +18,14 @@ func NewProjectsStore(db *sql.DB) *ProjectsStore {
 }
 
 func (p *ProjectsStore) CreateProject(project *types.Project) error {
+	_, err := p.db.Exec("PRAGMA foreign_keys = OFF")
+	if err != nil {
+		log.Fatal(err)
+	}
 	stmt := `INSERT INTO projects (parent_id, title, description, status, assignee_id, urgency, notes, start_date, end_date)` +
 		`VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	_, err := p.db.Exec(
+	_, err = p.db.Exec(
 		stmt,
 		project.ParentID,
 		project.Title,
