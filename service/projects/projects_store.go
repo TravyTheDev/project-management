@@ -70,7 +70,7 @@ func (p *ProjectsStore) UpdateProject(project *types.Project) error {
 }
 
 func (p *ProjectsStore) GetAllProjects() ([]*types.Project, error) {
-	stmt := `SELECT * FROM projects where parent_id = 0`
+	stmt := `SELECT * FROM projects where parent_id = -1`
 
 	rows, err := p.db.Query(stmt)
 	if err != nil {
