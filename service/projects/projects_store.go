@@ -53,10 +53,14 @@ func (p *ProjectsStore) DeleteProject(id int) error {
 }
 
 func (p *ProjectsStore) UpdateProject(project *types.Project) error {
+	_, err := p.db.Exec("PRAGMA foreign_keys = OFF")
+	if err != nil {
+		log.Fatal(err)
+	}
 	stmt := `UPDATE projects SET parent_id = ?, title = ?, description = ?, status = ?, assignee_id = ?, urgency = ?, notes = ?, ` +
 		`start_date = ?, end_date = ?, updated_at = datetime(current_timestamp, 'localtime') where id = ?`
 
-	_, err := p.db.Exec(
+	_, err = p.db.Exec(
 		stmt,
 		project.ParentID,
 		project.Title,
