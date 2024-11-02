@@ -25,12 +25,14 @@ type RegisterPayload struct {
 	Email           string `json:"email" validate:"required,email"`
 	Password        string `json:"password" validate:"required,min=3,max=130"`
 	PasswordConfirm string `json:"passwordConfirm"`
+	IsAdmin         bool   `json:"isAdmin"`
 }
 
 type UserRes struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	IsAdmin  bool   `json:"isAdmin"`
 }
 
 type LoginUserPayload struct {

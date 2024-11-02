@@ -33,7 +33,7 @@ func NewHandler(userStore types.UserStore, sessionStore types.SessionStore, secr
 func (h *UserHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/search_user/{email}", h.handleSearchByEmail).Methods("GET")
 	router.HandleFunc("/search_username/{name}", h.searchUser).Methods("GET")
-	router.HandleFunc("/register/{lang}", h.handleRegister).Methods("POST")
+	router.HandleFunc("/register/{lang}", jwt.GetAuthMiddlewareFunc(h.jwtMaker, h.handleRegister)).Methods("POST")
 	router.HandleFunc("/login/{lang}", h.handleLogin).Methods("POST")
 	router.HandleFunc("/logout", h.handleLogout).Methods("POST")
 	router.HandleFunc("/me", jwt.GetAuthMiddlewareFunc(h.jwtMaker, h.handleGetUser)).Methods("GET")
@@ -72,7 +72,7 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		Username: payload.Username,
 		Email:    payload.Email,
 		Password: hashedPassword,
-		IsAdmin:  false,
+		IsAdmin:  payload.IsAdmin,
 	}
 
 	u, err := h.userStore.CreateUser(user)

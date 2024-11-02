@@ -78,6 +78,7 @@ func (s *UserStore) GetUserByID(id int) (*types.UserRes, error) {
 		ID:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,
+		IsAdmin:  user.IsAdmin,
 	}
 	return u, nil
 }
@@ -107,6 +108,7 @@ func (s *UserStore) SearchUser(text string) ([]*types.UserRes, error) {
 			ID:       u.ID,
 			Username: u.Username,
 			Email:    u.Email,
+			IsAdmin:  u.IsAdmin,
 		}
 		users = append(users, user)
 	}
